@@ -80,8 +80,8 @@ export async function fetchGmailMessages(
 ): Promise<ParsedEmail[]> {
   const baseUrl = 'https://gmail.googleapis.com/gmail/v1/users/me'
 
-  // Wedding-related search query
-  const weddingQuery = query || 'wedding OR venue OR catering OR photographer OR florist OR "save the date" OR RSVP OR reception'
+  // Wedding-related search query (empty = all recent emails)
+  const weddingQuery = query || ''
 
   // Get list of message IDs
   const listUrl = `${baseUrl}/messages?maxResults=${maxResults}&q=${encodeURIComponent(weddingQuery)}`
