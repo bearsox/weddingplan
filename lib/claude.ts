@@ -47,7 +47,13 @@ Return only valid JSON, no other text.`
       throw new Error('Unexpected response type')
     }
 
-    const result = JSON.parse(content.text)
+    // Strip markdown code blocks if present
+    let jsonText = content.text.trim()
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```json?\n?/, '').replace(/\n?```$/, '')
+    }
+
+    const result = JSON.parse(jsonText)
     return {
       summary: result.summary || 'Unable to summarize email',
       actionItems: result.actionItems || [],
@@ -109,7 +115,13 @@ Return only valid JSON array, no other text.`
       throw new Error('Unexpected response type')
     }
 
-    return JSON.parse(content.text)
+    // Strip markdown code blocks if present
+    let jsonText = content.text.trim()
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```json?\n?/, '').replace(/\n?```$/, '')
+    }
+
+    return JSON.parse(jsonText)
   } catch (error) {
     console.error('Error extracting tasks:', error)
     return []
