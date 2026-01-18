@@ -118,8 +118,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ emails: processedEmails, cached: false })
   } catch (error) {
     console.error('Error fetching emails:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to fetch emails' },
+      { error: 'Failed to fetch emails', details: message },
       { status: 500 }
     )
   }
