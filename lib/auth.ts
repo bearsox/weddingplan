@@ -3,6 +3,9 @@ import GoogleProvider from 'next-auth/providers/google'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 
+// Only these emails can sign in
+const ALLOWED_EMAILS = ['strieblev@gmail.com']
+
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma) as AuthOptions['adapter'],
   providers: [
@@ -20,6 +23,13 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      // Only allow specific emails to sign in
+      if (!user.email || !ALLOWED_EMAILS.includes(user.email.toLowerCase())) {
+        return false
+      }
+      return true
+    },
     async session({ session, user }) {
       // Add user ID to session
       if (session.user) {
