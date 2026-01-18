@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --wedding-cream: #FDF8F3;
+  --wedding-sage: #9CAF88;
+  --wedding-dustyrose: #D4A5A5;
+  --wedding-gold: #C9A962;
+  --wedding-charcoal: #36454F;
+}
+
+body {
+  background-color: var(--wedding-cream);
+  color: var(--wedding-charcoal);
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-wedding-sage text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-wedding-dustyrose text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-wedding-sage focus:border-transparent;
+  }
+
+  .nav-link {
+    @apply text-wedding-charcoal hover:text-wedding-sage transition-colors px-3 py-2 rounded-lg hover:bg-white/50;
+  }
+
+  .nav-link-active {
+    @apply bg-white text-wedding-sage font-medium;
+  }
+}

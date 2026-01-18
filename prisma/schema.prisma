@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  // Wedding-specific relations
+  checklistItems ChecklistProgress[]
+  vendors        Vendor[]
+  tasks          Task[]
+  settings       Settings?
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Wedding Planning Models
+
+model ChecklistProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  itemId      String   // References the static checklist item ID
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+}
+
+model Vendor {
+  id          String       @id @default(cuid())
+  userId      String
+  name        String
+  type        String       // venue, photographer, caterer, etc.
+  status      VendorStatus @default(RESEARCHING)
+  email       String?
+  phone       String?
+  website     String?
+  address     String?
+  priceRange  String?      // e.g., "$5000-$8000"
+  rating      Int?         // 1-5 stars
+  notes       String?      @db.Text
+  pros        String?      @db.Text
+  cons        String?      @db.Text
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionAnswers VendorQuestion[]
+}
+
+enum VendorStatus {
+  RESEARCHING
+  CONTACTED
+  INTERVIEWED
+  BOOKED
+  REJECTED
+}
+
+model VendorQuestion {
+  id         String   @id @default(cuid())
+  vendorId   String
+  questionId String   // References static question ID
+  answer     String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, questionId])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  source      TaskSource @default(MANUAL)
+  sourceId    String?    // Email ID if from email
+  priority    Priority   @default(MEDIUM)
+  completed   Boolean    @default(false)
+  completedAt DateTime?
+  dueDate     DateTime?
+  snoozedUntil DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum TaskSource {
+  MANUAL
+  EMAIL
+  CHECKLIST
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Settings {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  weddingDate  DateTime?
+  partner1Name String   @default("Jared")
+  partner2Name String   @default("Charlee")
+  weddingEmail String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailCache {
+  id           String   @id @default(cuid())
+  emailId      String   @unique
+  threadId     String
+  from         String
+  subject      String
+  snippet      String
+  body         String   @db.Text
+  date         DateTime
+  summary      String?  @db.Text
+  actionItems  String?  @db.Text // JSON array
+  hasActionItems Boolean @default(false)
+  priority     String   @default("low")
+  category     String   @default("general")
+  processedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
