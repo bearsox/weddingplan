@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import EasterEgg from './EasterEgg'
 
 const navItems = [
   { href: '/', label: 'Dashboard' },
@@ -16,16 +18,27 @@ const navItems = [
 export default function Navigation() {
   const pathname = usePathname()
   const { data: session, status } = useSession()
+  const [showEasterEgg, setShowEasterEgg] = useState(false)
 
   return (
+    <>
+      <EasterEgg isOpen={showEasterEgg} onClose={() => setShowEasterEgg(false)} />
     <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl">💒</span>
-            <span className="font-serif text-xl text-wedding-charcoal">J & C</span>
-          </Link>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowEasterEgg(true)}
+              className="text-2xl hover:scale-125 transition-transform cursor-pointer"
+              aria-label="Easter egg"
+            >
+              💒
+            </button>
+            <Link href="/" className="font-serif text-xl text-wedding-charcoal">
+              J & C
+            </Link>
+          </div>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-1">
@@ -85,5 +98,6 @@ export default function Navigation() {
         </div>
       </div>
     </nav>
+    </>
   )
 }
