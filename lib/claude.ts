@@ -1,8 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+function getClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 export interface EmailSummary {
   summary: string
@@ -17,24 +19,24 @@ export async function summarizeEmail(
   subject: string,
   body: string
 ): Promise<EmailSummary> {
-  const prompt = `You are a helpful wedding planning assistant. Analyze this wedding-related email and provide a summary.
+  const prompt = `You are a wedding planning assistant. Focus on extracting ACTION ITEMS from this email.
 
 From: ${from}
 Subject: ${subject}
 Body:
 ${body.slice(0, 3000)}
 
-Respond in JSON format with these fields:
-- summary: A concise 1-2 sentence summary of the email
-- actionItems: An array of specific action items the recipient needs to take (empty array if none)
-- hasActionItems: true if there are action items, false otherwise
-- priority: "high" if requires immediate response or has a deadline, "medium" if important but not urgent, "low" if informational
+Respond in JSON format:
+- summary: Focus on what ACTION is needed (e.g., "Venue wants deposit by Friday" or "Need to confirm guest count"). If no action needed, briefly state the email's purpose.
+- actionItems: Array of specific tasks (e.g., ["Send $500 deposit to venue by Jan 20", "Reply to confirm appointment time"]). Be specific with amounts, dates, names.
+- hasActionItems: true if action is required, false if informational only
+- priority: "high" if has deadline within 2 weeks or requires immediate response, "medium" if needs attention soon, "low" if informational
 - category: One of: "venue", "catering", "photography", "flowers", "music", "attire", "invitations", "guest_management", "honeymoon", "budget", "general"
 
 Return only valid JSON, no other text.`
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
       messages: [{ role: 'user', content: prompt }],
@@ -95,7 +97,7 @@ Return a JSON array of tasks. Only include real, specific action items - not gen
 Return only valid JSON array, no other text.`
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
