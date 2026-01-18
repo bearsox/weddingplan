@@ -10,8 +10,14 @@ interface Settings {
   weddingEmail?: string
 }
 
+interface ApiUsage {
+  error?: string
+  note?: string
+}
+
 export default function SettingsPage() {
   const { data: session } = useSession()
+  const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null)
   const [settings, setSettings] = useState<Settings>({
     weddingDate: '2027-06-21',
     partner1Name: 'Jared',
@@ -24,7 +30,20 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchSettings()
+    fetchApiUsage()
   }, [])
+
+  async function fetchApiUsage() {
+    try {
+      const response = await fetch('/api/usage')
+      if (response.ok) {
+        const data = await response.json()
+        setApiUsage(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch API usage:', error)
+    }
+  }
 
   async function fetchSettings() {
     try {
@@ -202,6 +221,31 @@ export default function SettingsPage() {
                 ✓ Connected to Google - Gmail access enabled for email summaries
               </p>
             </div>
+          </div>
+        )}
+
+        {/* API Usage */}
+        {session && (
+          <div className="card">
+            <h2 className="text-xl font-semibold text-wedding-charcoal mb-4">
+              Claude API Usage
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              The AI email summaries use Claude API credits. Check your usage and balance:
+            </p>
+            <a
+              href="https://console.anthropic.com/settings/billing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary inline-block text-sm"
+            >
+              View API Usage & Billing →
+            </a>
+            {apiUsage && !apiUsage.error && (
+              <pre className="mt-4 p-3 bg-gray-100 rounded text-xs overflow-auto">
+                {JSON.stringify(apiUsage, null, 2)}
+              </pre>
+            )}
           </div>
         )}
 
