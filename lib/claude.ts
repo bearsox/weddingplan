@@ -57,8 +57,9 @@ Return only valid JSON, no other text.`
     }
   } catch (error) {
     console.error('Error summarizing email:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return {
-      summary: 'Unable to summarize email',
+      summary: `Error: ${errorMessage}`,
       actionItems: [],
       hasActionItems: false,
       priority: 'low',
